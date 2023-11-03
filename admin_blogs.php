@@ -1,77 +1,78 @@
 <?php
 
-    require "./model.php";
+require "./model.php";
 
-    session_start();
+session_start();
 
-    if (!isset($_SESSION["username"])) {
-        header("location:index.php");
-    }
+if (!isset($_SESSION["username"])) {
+    header("location:index.php");
+}
 
-    // instance of Model class
-    $modelObj = new Model();
+// instance of Model class
+$modelObj = new Model();
 
-    if (isset($_POST["create_blog"])) {
-        $table_name = "blog_tb";
-        $blog_date = date("D M d, Y G:i"); // get the current date
+if (isset($_POST["create_blog"])) {
+    $table_name = "blog_tb";
+    $blog_date = date("D M d, Y G:i"); // get the current date
 
-        $filename = $_FILES['blogImg']['name'];
-        // Select file type
-        $imageFileType = strtolower(pathinfo($filename,PATHINFO_EXTENSION));
-	
-        // valid file extensions
-        $extensions_arr = array("jpg","jpeg","png","gif");
-        
+    $filename = $_FILES['blogImg']['name'];
+    // Select file type
+    $imageFileType = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+    // valid file extensions
+    $extensions_arr = array("jpg", "jpeg", "png", "gif");
+
+    // folder
+    if ($filename != "") {
         // folder
-        if ($filename != "") {
-            // folder
-            $folder = 'uploads/'.$filename;
-        } else {
-            $folder = "";
-        }
-
-        // Check extension
-        if(in_array($imageFileType, $extensions_arr) ) {
-            // Upload files and store in database
-	        move_uploaded_file($_FILES["blogImg"]["tmp_name"], $folder);
-	    }
-
-        $data = array(
-            "blog_title" => $modelObj->escapeString($_POST["blogTitle"]),
-            "blog_date" => $blog_date,
-            "blog_desc" => $modelObj->escapeString($_POST["blogDesc"]),
-            "blog_img" => $folder
-        );
-
-        $sql = $modelObj->createRecord($table_name, $data);
-        
-        if ($sql) {
-            echo '<script>alert("created successfuly")</script>';
-            echo '<script>window.location.href = "admin_blogs.php"</script>';
-        } else {
-            echo '<script>alert("error")</script>';
-        }
+        $folder = 'uploads/' . $filename;
+    } else {
+        $folder = "";
     }
 
-    // if delete
-    if (isset($_GET["deleteId"])) {
-        $deleteId = $_GET["deleteId"];
-        $table_name = "blog_tb";
-        $row_name = "blog_id";
-
-        $sql = $modelObj->deleteRecord($table_name, $row_name,$deleteId);
-
-        if ($sql) {
-            echo '<script>alert("deleted successfuly")</script>';
-            echo '<script>window.location.href = "admin_blogs.php"</script>';
-        } else {
-            echo "error";
-        }
+    // Check extension
+    if (in_array($imageFileType, $extensions_arr)) {
+        // Upload files and store in database
+        move_uploaded_file($_FILES["blogImg"]["tmp_name"], $folder);
     }
+
+    $data = array(
+        "blog_title" => $modelObj->escapeString($_POST["blogTitle"]),
+        "blog_date" => $blog_date,
+        "blog_desc" => $modelObj->escapeString($_POST["blogDesc"]),
+        "blog_img" => $folder
+    );
+
+    $sql = $modelObj->createRecord($table_name, $data);
+
+    if ($sql) {
+        echo '<script>alert("created successfuly")</script>';
+        echo '<script>window.location.href = "admin_blogs.php"</script>';
+    } else {
+        echo '<script>alert("error")</script>';
+    }
+}
+
+// if delete
+if (isset($_GET["deleteId"])) {
+    $deleteId = $_GET["deleteId"];
+    $table_name = "blog_tb";
+    $row_name = "blog_id";
+
+    $sql = $modelObj->deleteRecord($table_name, $row_name, $deleteId);
+
+    if ($sql) {
+        echo '<script>alert("deleted successfuly")</script>';
+        echo '<script>window.location.href = "admin_blogs.php"</script>';
+    } else {
+        echo "error";
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -87,6 +88,7 @@
     <script src="https://cdn.tiny.cloud/1/i6fxfutje62g2wf84y87i79e10pnnx05ysiw7bvzmzt0sw1z/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <!-- Website name -->
@@ -129,26 +131,26 @@
                 <tbody class="text-center">
                     <!-- data loop -->
                     <?php
-                        $table_name = "blog_tb";
-                        $movies = $modelObj->readRecord($table_name);
-                        foreach($movies as $movie) {
+                    $table_name = "blog_tb";
+                    $movies = $modelObj->readRecord($table_name);
+                    foreach ($movies as $movie) {
                     ?>
-                    <tr>
-                        <td><img src="<?php echo $movie['blog_img']; ?>" class="img-fluid" alt="img"></td>
-                        <td><?php echo $movie['blog_title']; ?></td>
-                        <td><?php echo $movie['blog_date']; ?></td>
-                        <td><?php echo $movie['blog_desc']; ?></td>
-                        <td class="">
-                            <!-- edit button -->
-                            <a href="update_blogs.php?updateId=<?php echo $movie['blog_id']; ?>" class="btn btn-success" data-toggle="tooltip" data-placement="right" title="Edit" type="button">
-                                <i class="fa fa-edit"></i>
-                            </a>
-                            <!-- delete button -->
-                            <a href="admin_blogs.php?deleteId=<?php echo $movie['blog_id']; ?>" class="btn btn-danger mt-2" data-toggle="tooltip" data-placement="right" title="Delete" type="button" onclick="return confirm('Are you sure you want to delete this blog ?');">
-                                <i class="fa fa-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td><img src="<?php echo $movie['blog_img']; ?>" class="img-fluid" alt="img"></td>
+                            <td><?php echo $movie['blog_title']; ?></td>
+                            <td><?php echo $movie['blog_date']; ?></td>
+                            <td><?php echo $movie['blog_desc']; ?></td>
+                            <td class="">
+                                <!-- edit button -->
+                                <a href="update_blogs.php?updateId=<?php echo $movie['blog_id']; ?>" class="btn btn-success" data-toggle="tooltip" data-placement="right" title="Edit" type="button">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <!-- delete button -->
+                                <a href="admin_blogs.php?deleteId=<?php echo $movie['blog_id']; ?>" class="btn btn-danger mt-2" data-toggle="tooltip" data-placement="right" title="Delete" type="button" onclick="return confirm('Are you sure you want to delete this blog ?');">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
                     <?php } ?>
                 </tbody>
             </table>
@@ -202,11 +204,10 @@
 
         // Prevent Bootstrap dialog from blocking focusin
         $(document).on('focusin', function(e) {
-        if ($(e.target).closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root").length) {
-            e.stopImmediatePropagation();
-        }
+            if ($(e.target).closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root").length) {
+                e.stopImmediatePropagation();
+            }
         });
-
     </script>
 
 
@@ -215,4 +216,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
+
 </html>
